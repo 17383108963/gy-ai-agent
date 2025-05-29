@@ -2,7 +2,10 @@ package com.gy.gyaiagent.app;
 
 import com.gy.gyaiagent.advisor.MyCustomAdvidor;
 import com.gy.gyaiagent.advisor.ReReadingAdvisor;
+import com.gy.gyaiagent.chatmemory.DatabaseChatMemory;
 import com.gy.gyaiagent.chatmemory.FileBasedChatMemory;
+import com.gy.gyaiagent.service.ChatMessageService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -32,16 +35,17 @@ public class LoveApp {
             "恋爱状态询问沟通、习惯差异引发的矛盾；已婚状态询问家庭责任与亲属关系处理的问题。" +
             "引导用户详述事情经过、对方反应及自身想法，以便给出专属解决方案。";
 
-    public LoveApp(ChatModel dashscopeChatModel) {
+    public LoveApp(ChatModel dashscopeChatModel, DatabaseChatMemory databaseChatMemory) {
         // 初始化基于文件的对话记忆
-        String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
-        FileBasedChatMemory chatMemory = new FileBasedChatMemory(fileDir);
+//        String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
+//        FileBasedChatMemory chatMemory = new FileBasedChatMemory(fileDir);
 //        // 初始化基于内存的对话记忆
 //        ChatMemory chatMemory = new InMemoryChatMemory();
+        //初始化基于MySQL数据库的对话记忆
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
-                        new MessageChatMemoryAdvisor(chatMemory),
+                        new MessageChatMemoryAdvisor(databaseChatMemory),
                         //自定义advisor,按需开启
                         new MyCustomAdvidor()
                         //自定义推理增强Read2advisor，按需开启
