@@ -36,7 +36,7 @@ public class MyCustomAdvidor implements CallAroundAdvisor, StreamAroundAdvisor {
 	}
 
 	private AdvisedRequest before(AdvisedRequest advisedRequest) {
-		log.info("AI Request: {}", advisedRequest.userText());
+		log.info("User Request: {}", advisedRequest.userText());
 		return advisedRequest;
 	}
 
