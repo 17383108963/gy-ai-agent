@@ -5,9 +5,12 @@ import com.gy.gyaiagent.chatmemory.DatabaseChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -64,7 +67,34 @@ public class NovelApp {
         return content;
     }
 
+    @jakarta.annotation.Resource
+    private VectorStore novelAppVectorStore;
 
+    @jakarta.annotation.Resource
+    private Advisor novelAppRagCloudAdvisor;
+
+    /**
+     * 和 RAG知识库进行对话
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public String doChatWithRag(String message, String chatId) {
+        ChatResponse response = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                //启用本地RAG知识库问答
+                //.advisors(new QuestionAnswerAdvisor(novelAppVectorStore))
+                //启用云知识库 RAG 问答，检索增强服务
+                .advisors(novelAppRagCloudAdvisor)
+                .call()
+                .chatResponse();
+        String content = response.getResult().getOutput().getText();
+//        log.info("content: {}", content);
+        return content;
+    }
 
 }
 
