@@ -1,5 +1,6 @@
 package com.gy.gyaiagent.chatmemory;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.gy.gyaiagent.converter.MessageConverter;
 import com.gy.gyaiagent.model.entity.ChatMessage;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@DS("mysql")
 public class DatabaseChatMemory implements ChatMemory {
 
     private final ChatMessageService chatMessageService;

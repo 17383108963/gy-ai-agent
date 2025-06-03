@@ -3,11 +3,6 @@ spring:
     name: gy-ai-agent
   profiles:
     active: local
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/gy_ai_agent?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci
-    username: root
-    password: 249323
 server:
   port: 8123
   servlet:

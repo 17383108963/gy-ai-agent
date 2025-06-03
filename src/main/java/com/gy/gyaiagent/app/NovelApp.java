@@ -1,5 +1,6 @@
 package com.gy.gyaiagent.app;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.gy.gyaiagent.advisor.MyCustomAdvidor;
 import com.gy.gyaiagent.chatmemory.DatabaseChatMemory;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,9 @@ public class NovelApp {
     @jakarta.annotation.Resource
     private Advisor novelAppRagCloudAdvisor;
 
+    @jakarta.annotation.Resource
+    private VectorStore pgVectorVectorStore;
+
     /**
      * 和 RAG知识库进行对话
      * @param message
@@ -87,8 +91,10 @@ public class NovelApp {
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 //启用本地RAG知识库问答
                 //.advisors(new QuestionAnswerAdvisor(novelAppVectorStore))
-                //启用云知识库 RAG 问答，检索增强服务
-                .advisors(novelAppRagCloudAdvisor)
+                //应用 RAG 检索增强服务 （基于云知识库向量存储）
+//                .advisors(novelAppRagCloudAdvisor)
+                //应用 RAG 检索增强服务 （基于 PgVector 向量存储）
+                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
                 .call()
                 .chatResponse();
         String content = response.getResult().getOutput().getText();
