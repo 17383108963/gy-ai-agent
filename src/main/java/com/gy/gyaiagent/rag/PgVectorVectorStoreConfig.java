@@ -63,8 +63,9 @@ public class PgVectorVectorStoreConfig {
                 .maxDocumentBatchSize(10000)         // Optional: defaults to 10000
                 .initializeSchema(false)
                 .build();
-        List<Document> documents = novelAppDocumentLoader.loadMarkdown();
-        vectorStore.add(documents);
+        //由于每次跑项目都会加载该类，所以为了不重复向vector添加数据，先注释掉 TODO
+//        List<Document> documents = novelAppDocumentLoader.loadMarkdown();
+//        vectorStore.add(documents);
         return vectorStore;
     }
 }

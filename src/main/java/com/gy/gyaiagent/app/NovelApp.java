@@ -3,6 +3,7 @@ package com.gy.gyaiagent.app;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.gy.gyaiagent.advisor.MyCustomAdvidor;
 import com.gy.gyaiagent.chatmemory.DatabaseChatMemory;
+import com.gy.gyaiagent.rag.QueryRewriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -11,6 +12,8 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.rag.preretrieval.query.transformation.QueryTransformer;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -77,6 +80,9 @@ public class NovelApp {
     @jakarta.annotation.Resource
     private VectorStore pgVectorVectorStore;
 
+    @jakarta.annotation.Resource
+    private QueryRewriter queryRewriter;
+
     /**
      * 和 RAG知识库进行对话
      * @param message
@@ -84,21 +90,46 @@ public class NovelApp {
      * @return
      */
     public String doChatWithRag(String message, String chatId) {
+
+        //执行查询重写
+//        String queryRewrite = queryRewriter.doQueryRewrite(message);
+
         ChatResponse response = chatClient
                 .prompt()
+                // 重写后的查询语句
+//                .user(queryRewrite)
                 .user(message)
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 //启用本地RAG知识库问答
                 //.advisors(new QuestionAnswerAdvisor(novelAppVectorStore))
                 //应用 RAG 检索增强服务 （基于云知识库向量存储）
-//                .advisors(novelAppRagCloudAdvisor)
+                .advisors(novelAppRagCloudAdvisor)
                 //应用 RAG 检索增强服务 （基于 PgVector 向量存储）
-                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+//                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
                 .call()
                 .chatResponse();
         String content = response.getResult().getOutput().getText();
 //        log.info("content: {}", content);
+        return content;
+    }
+
+    @jakarta.annotation.Resource
+    private ToolCallback[] allTools;
+
+    public String doChatWithTools(String message, String chatId) {
+        ChatResponse response = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                // 开启日志
+                .advisors(new MyCustomAdvidor())
+                .tools(allTools)
+                .call()
+                .chatResponse();
+        String content = response.getResult().getOutput().getText();
+        log.info("content: {}", content);
         return content;
     }
 
