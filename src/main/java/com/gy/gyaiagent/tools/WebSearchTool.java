@@ -47,7 +47,7 @@ public class WebSearchTool {
             String relatedResults = relatedSearches.stream()
                     .map(obj -> ((JSONObject)obj).getStr("query"))
                     .collect(Collectors.joining(","));
-            return "热门搜索:\n" + topResults + "\n\n相关搜索:\n" + relatedResults;
+            return "相关搜索:\n" + relatedResults;
         } catch (Exception e) {
             return "Error searching Baidu: " + e.getMessage();
         }
