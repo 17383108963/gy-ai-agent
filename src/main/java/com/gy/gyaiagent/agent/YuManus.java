@@ -1,7 +1,9 @@
 package com.gy.gyaiagent.agent;
 
 import com.gy.gyaiagent.advisor.MyCustomAdvidor;
+import com.gy.gyaiagent.chatmemory.DatabaseChatMemory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Component;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class YuManus extends ToolCallAgent {
 
-    public YuManus(ToolCallback[] allTools, ChatModel dashscopeChatModel) {
+    public YuManus(ToolCallback[] allTools, DatabaseChatMemory databaseChatMemory, ChatModel dashscopeChatModel) {
         super(allTools);
         this.setName("yuManus");
         String SYSTEM_PROMPT = """  
@@ -31,7 +33,9 @@ public class YuManus extends ToolCallAgent {
         this.setMaxStep(20);
         // 初始化客户端
         ChatClient chatClient = ChatClient.builder(dashscopeChatModel)
-                .defaultAdvisors(new MyCustomAdvidor())
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(databaseChatMemory),
+                        new MyCustomAdvidor())
                 .build();
         this.setChatClient(chatClient);
     }

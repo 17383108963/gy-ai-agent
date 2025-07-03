@@ -2,6 +2,7 @@ package com.gy.gyaiagent.agent;
 
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
+import com.gy.gyaiagent.context.UserChatId;
 import com.gy.gyaiagent.enums.AgentState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +20,9 @@ import org.springframework.ai.tool.ToolCallback;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 
 /**
  * @author gyy
@@ -69,6 +73,8 @@ public class ToolCallAgent extends ReActAgent{
             // 获取带工具选项的响应
             ChatResponse chatResponse = getChatClient().prompt(prompt)
                     .system(getSystemPrompt())
+                    .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, UserChatId.getCtx())
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                     .tools(availableTools)
                     .call()
                     .chatResponse();
